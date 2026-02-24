@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关键词词库可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --accent-color: #ffe66d;
+            --dark-bg: #2d3436;
+            --card-bg: #ffffff;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .main-title {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .brand-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        
+        .brand-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+            display: inline-block;
+        }
+        
+        .brand-ning {
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+        
+        .brand-yeling {
+            color: #27ae60;
+            border-color: #27ae60;
+        }
+        
+        .funnel-chart {
+            height: 400px;
+            margin-bottom: 30px;
+        }
+        
+        .keyword-category {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .keyword-category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .keyword-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .keyword-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .tag-intent {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .tag-category {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .tag-defense {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .intent-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .intent-ning {
+            border-color: #e74c3c;
+        }
+        
+        .intent-yeling {
+            border-color: #27ae60;
+        }
+        
+        .intent-title {
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .word-cloud-container {
+            height: 350px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-chart {
+            height: 300px;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .section-divider {
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            border-radius: 2px;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">🍽️ 小红书关键词词库可视化分析</h1>
+    
+    <!-- 统计概览 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">2</div>
+                <div class="stats-label">品牌数量</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                <div class="stats-number">11</div>
+                <div class="stats-label">宁桂杏关键词类别</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
+                <div class="stats-number">11</div>
+                <div class="stats-label">野百灵关键词类别</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);">
+                <div class="stats-number">70+</div>
+                <div class="stats-label">核心关键词</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 品牌对比图 -->
+    <div class="brand-section animate-fade-in">
+        <h3 class="brand-title">📊 品牌关键词对比分析</h3>
+        <div id="comparisonChart" class="comparison-chart"></div>
+    </div>
+    
+    <!-- 宁桂杏山野烤肉 -->
+    <div class="brand-section animate-fade-in">
+        <h3 class="brand-title brand-ning">🥩 宁桂杏山野烤肉</h3>
+        
+        <!-- 漏斗图 -->
+        <div id="funnelNing" class="funnel-chart"></div>
+        
+        <!-- 关键词详情 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #f39c12;">🎯</span>
+                        周末/假日寻找灵感
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳周末去哪吃</span>
+                        <span class="keyword-tag tag-intent">绵阳探店</span>
+                        <span class="keyword-tag tag-intent">绵阳宝藏餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳网红打卡地</span>
+                        <span class="keyword-tag tag-intent">绵阳美食推荐</span>
+                        <span class="keyword-tag tag-intent">绵阳新晋网红店</span>
+                        <span class="keyword-tag tag-intent">绵阳必吃榜</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #3498db;">📍</span>
+                        位置/区域锁定
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag">绵阳市中心美食</span>
+                        <span class="keyword-tag">绵阳园艺山美食</span>
+                        <span class="keyword-tag">1958附近美食</span>
+                        <span class="keyword-tag">园艺山附近美食</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #9b59b6;">👥</span>
+                        商务社交/高净值人群
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳适合部门团建的美食</span>
+                        <span class="keyword-tag tag-intent">绵阳聚餐</span>
+                        <span class="keyword-tag tag-intent">绵阳宴请</span>
+                        <span class="keyword-tag tag-intent">绵阳适合朋友聚会的店</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #e91e63;">💃</span>
+                        年轻女性/闺蜜社交
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳闺蜜聚餐去哪</span>
+                        <span class="keyword-tag tag-intent">绵阳吃完能直接逛街的餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳适合聊天吃饭的地方</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #e74c3c;">💕</span>
+                        浪漫约会/纪念日
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳约会餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳情侣约会好去处</span>
+                        <span class="keyword-tag tag-intent">绵阳纪念日餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳求婚餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳七夕/情人节去哪吃</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #ff9800;">🎂</span>
+                        生日宴请/仪式感
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳过生日的餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳生日布置餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳过生日吃什么</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #00bcd4;">📸</span>
+                        社交打卡(品牌共通)
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳漂亮饭</span>
+                        <span class="keyword-tag tag-category">绵阳高颜值餐厅</span>
+                        <span class="keyword-tag tag-category">绵阳出片餐厅</span>
+                        <span class="keyword-tag tag-category">绵阳发朋友圈的餐厅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #795548;">🔥</span>
+                        烤肉品类锁定
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳山野风烤肉</span>
+                        <span class="keyword-tag tag-category">绵阳漂亮烤肉</span>
+                        <span class="keyword-tag tag-category">绵阳宝藏烤肉店</span>
+                        <span class="keyword-tag tag-category">绵阳网红烤肉</span>
+                        <span class="keyword-tag tag-category">绵阳烤肉天花板</span>
+                        <span class="keyword-tag tag-category">绵阳最好吃的烤肉</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #607d8b;">✨</span>
+                        差异化卖点
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳没有味道的烤肉</span>
+                        <span class="keyword-tag tag-category">绵阳吃完不臭的烤肉</span>
+                        <span class="keyword-tag tag-category">绵阳不用自己烤的店</span>
+                        <span class="keyword-tag tag-category">绵阳有人帮烤的烤肉店</span>
+                        <span class="keyword-tag tag-category">绵阳无烟烤肉</span>
+                        <span class="keyword-tag tag-category">绵阳适合穿小裙子吃的烤肉</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #673ab7;">💎</span>
+                        降维打击/抢高消费
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag">绵阳高端日料</span>
+                        <span class="keyword-tag">绵阳Bistro</span>
+                        <span class="keyword-tag">绵阳omakase</span>
+                        <span class="keyword-tag">绵阳黑珍珠餐厅</span>
+                        <span class="keyword-tag">绵阳高端西餐厅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="keyword-category" style="background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #e74c3c;">🛡️</span>
+                        口碑防御与决策词
+                    </div>
+                    <p style="color: #666; margin-bottom: 10px; font-size: 0.9rem;">用自己准备好的素人号或达人号发布，去占位，防止出现负面笔记。</p>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-defense">绵阳宁桂杏山野烤肉避雷</span>
+                        <span class="keyword-tag tag-defense">宁桂杏山野烤肉好吃吗</span>
+                        <span class="keyword-tag tag-defense">绵阳宁桂杏山野烤肉怎么样</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section-divider"></div>
+    
+    <!-- 野百灵贵州酸汤 -->
+    <div class="brand-section animate-fade-in">
+        <h3 class="brand-title brand-yeling">🍲 野百灵贵州酸汤</h3>
+        
+        <!-- 漏斗图 -->
+        <div id="funnelYeling" class="funnel-chart"></div>
+        
+        <!-- 关键词详情 -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #f39c12;">🎯</span>
+                        周末/假日寻找灵感
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳周末去哪吃</span>
+                        <span class="keyword-tag tag-intent">绵阳探店</span>
+                        <span class="keyword-tag tag-intent">绵阳宝藏餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳网红打卡地</span>
+                        <span class="keyword-tag tag-intent">绵阳美食推荐</span>
+                        <span class="keyword-tag tag-intent">绵阳新晋网红店</span>
+                        <span class="keyword-tag tag-intent">绵阳必吃榜</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #3498db;">📍</span>
+                        位置/区域锁定
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag">绵阳市中心美食</span>
+                        <span class="keyword-tag">绵阳园艺山美食</span>
+                        <span class="keyword-tag">1958附近美食</span>
+                        <span class="keyword-tag">园艺山附近美食</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #27ae60;">🥗</span>
+                        减脂/注重身材人群
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳减脂期外食</span>
+                        <span class="keyword-tag tag-intent">绵阳好吃不胖的餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳轻食餐厅推荐</span>
+                        <span class="keyword-tag tag-intent">绵阳健康饮食</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #8bc34a;">👨‍👩‍👧‍👦</span>
+                        长辈/家庭温情就餐
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳带长辈吃饭推荐</span>
+                        <span class="keyword-tag tag-intent">绵阳家庭聚餐推荐</span>
+                        <span class="keyword-tag tag-intent">绵阳适合全家吃的餐厅</span>
+                        <span class="keyword-tag tag-intent">绵阳带小孩吃饭</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #e91e63;">👯‍♀️</span>
+                        闺蜜局/下午茶后
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-intent">绵阳清爽晚餐推荐</span>
+                        <span class="keyword-tag tag-intent">绵阳闺蜜下午茶续摊</span>
+                        <span class="keyword-tag tag-intent">绵阳适合聊天的火锅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #00bcd4;">📸</span>
+                        社交打卡(品牌共通)
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳漂亮饭</span>
+                        <span class="keyword-tag tag-category">绵阳高颜值餐厅</span>
+                        <span class="keyword-tag tag-category">绵阳出片餐厅</span>
+                        <span class="keyword-tag tag-category">绵阳氛围感餐厅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #ff5722;">🍜</span>
+                        品类与地域锁定
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳酸汤火锅</span>
+                        <span class="keyword-tag tag-category">绵阳地道贵州酸汤</span>
+                        <span class="keyword-tag tag-category">凯里酸汤绵阳</span>
+                        <span class="keyword-tag tag-category">绵阳酸汤牛肉</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #673ab7;">🌟</span>
+                        小众格调锁定
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳特色小众火锅</span>
+                        <span class="keyword-tag tag-category">绵阳高颜值火锅</span>
+                        <span class="keyword-tag tag-category">绵阳小众高级餐厅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #009688;">🍃</span>
+                        解腻清爽需求
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-category">绵阳解腻的火锅</span>
+                        <span class="keyword-tag tag-category">绵阳吃腻了牛油火锅</span>
+                        <span class="keyword-tag tag-category">绵阳没胃口吃什么</span>
+                        <span class="keyword-tag tag-category">绵阳清淡的火锅</span>
+                        <span class="keyword-tag tag-category">绵阳不开火吃什么</span>
+                        <span class="keyword-tag tag-category">绵阳夏天/降温吃什么</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="keyword-category">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #cddc39;">🌏</span>
+                        异国风情/滋补清淡
+                    </div>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag">绵阳泰餐</span>
+                        <span class="keyword-tag">绵阳冬阴功汤</span>
+                        <span class="keyword-tag">绵阳潮汕牛肉火锅</span>
+                        <span class="keyword-tag">绵阳寿喜锅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="keyword-category" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                    <div class="category-title">
+                        <span class="category-icon" style="background: #27ae60;">🛡️</span>
+                        口碑防御与决策词
+                    </div>
+                    <p style="color: #666; margin-bottom: 10px; font-size: 0.9rem;">用自己准备好的素人号或达人号发布，去占位，防止出现负面笔记。</p>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag tag-defense">绵阳野百灵酸汤避雷</span>
+                        <span class="keyword-tag tag-defense">野百灵酸汤好吃吗</span>
+                        <span class="keyword-tag tag-defense">绵阳野百灵酸汤怎么样</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 宁桂杏漏斗图
+        const funnelNing = echarts.init(document.getElementById('funnelNing'));
+        funnelNing.setOption({
+            title: {
+                text: '关键词漏斗层级分布',
+                left: 'center',
+                textStyle: { fontSize: 16, color: '#2d3436' }
+            },
+            tooltip: { trigger: 'item', formatter: '{b}: {c}' },
+            series: [{
+                type: 'funnel',
+                left: '10%',
+                top: 60,
+                bottom: 20,
+                width: '80%',
+                min: 0,
+                max: 100,
+                minSize: '0%',
+                maxSize: '100%',
+                sort: 'descending',
+                gap: 2,
+                label: {
+                    show: true,
+                    position: 'inside',
+                    formatter: '{b}',
+                    color: '#fff'
+                },
+                itemStyle: {
+                    borderColor: '#fff',
+                    borderWidth: 1
+                },
+                data: [
+                    { value: 100, name: '泛需求(周末/探店)', itemStyle: { color: '#e74c3c' } },
+                    { value: 80, name: '场景需求(约会/聚餐)', itemStyle: { color: '#f39c12' } },
+                    { value: 60, name: '品类锁定(烤肉)', itemStyle: { color: '#9b59b6' } },
+                    { value: 40, name: '差异化卖点', itemStyle: { color: '#3498db' } },
+                    { value: 30, name: '口碑防御', itemStyle: { color: '#27ae60' } }
+                ]
+            }]
+        });
+        
+        // 野百灵漏斗图
+        const funnelYeling = echarts.init(document.getElementById('funnelYeling'));
+        funnelYeling.setOption({
+            title: {
+                text: '关键词漏斗层级分布',
+                left: 'center',
+                textStyle: { fontSize: 16, color: '#2d3436' }
+            },
+            tooltip: { trigger: 'item', formatter: '{b}: {c}' },
+            series: [{
+                type: 'funnel',
+                left: '10%',
+                top: 60,
+                bottom: 20,
+                width: '80%',
+                min: 0,
+                max: 100,
+                minSize: '0%',
+                maxSize: '100%',
+                sort: 'descending',
+                gap: 2,
+                label: {
+                    show: true,
+                    position: 'inside',
+                    formatter: '{b}',
+                    color: '#fff'
+                },
+                itemStyle: {
+                    borderColor: '#fff',
+                    borderWidth: 1
+                },
+                data: [
+                    { value: 100, name: '泛需求(周末/探店)', itemStyle: { color: '#27ae60' } },
+                    { value: 80, name: '场景需求(家庭/闺蜜)', itemStyle: { color: '#2ecc71' } },
+                    { value: 60, name: '品类锁定(酸汤)', itemStyle: { color: '#1abc9c' } },
+                    { value: 40, name: '差异化卖点(解腻)', itemStyle: { color: '#16a085' } },
+                    { value: 30, name: '口碑防御', itemStyle: { color: '#3498db' } }
+                ]
+            }]
+        });
+        
+        // 对比图
+        const comparisonChart = echarts.init(document.getElementById('comparisonChart'));
+        comparisonChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' }
+            },
+            legend: {
+                data: ['宁桂杏山野烤肉', '野百灵贵州酸汤'],
+                top: 10
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: ['泛需求词', '场景需求词', '品类锁定词', '差异化词', '口碑防御词']
+            },
+            yAxis: { type: 'value' },
+            series: [
+                {
+                    name: '宁桂杏山野烤肉',
+                    type: 'bar',
+                    data: [7, 15, 12, 6, 3],
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#e74c3c' },
+                            { offset: 1, color: '#c0392b' }
+                        ])
+                    }
+                },
+                {
+                    name: '野百灵贵州酸汤',
+                    type: 'bar',
+                    data: [7, 14, 7, 6, 3],
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#27ae60' },
+                            { offset: 1, color: '#1e8449' }
+                        ])
+                    }
+                }
+            ]
+        });
+        
+        // 响应式
+        window.addEventListener('resize', function() {
+            funnelNing.resize();
+            funnelYeling.resize();
+            comparisonChart.resize();
+        });
+    </script>
+</body>
+</html>
