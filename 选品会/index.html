@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>有点东西选品会 · 产品研发提案</title>
+<style>
+  :root {
+    --bg: #f5efe6;
+    --paper: rgba(255,255,255,0.72);
+    --paper-strong: rgba(255,255,255,0.88);
+    --ink: #1f1a17;
+    --ink-soft: #4a3f37;
+    --muted: #6f645d;
+    --muted-2: #9a8c7f;
+    --accent: #d86b2a;
+    --accent-deep: #9e4218;
+    --accent-soft: #f3d7c4;
+    --teal: #2d7b74;
+    --teal-soft: #d7e6e3;
+    --brass: #b07d2e;
+    --brass-soft: #f0e2c6;
+    --olive: #6b7539;
+    --olive-soft: #e6ead2;
+    --line: rgba(123,92,62,0.14);
+    --line-soft: rgba(123,92,62,0.09);
+    --shadow: 0 20px 60px rgba(72,45,18,0.12);
+    --shadow-lg: 0 30px 72px rgba(72,45,18,0.18);
+    --radius-xl: 30px;
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --serif: 'Iowan Old Style', 'Songti SC', 'STSong', 'Noto Serif SC', 'SimSun', serif;
+    --num: 'Iowan Old Style', Georgia, 'Songti SC', 'Times New Roman', serif;
+    --sans: 'Avenir Next', -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 32px; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    line-height: 1.75;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(circle at top left, rgba(216,107,42,0.14), transparent 32%),
+      radial-gradient(circle at 92% 6%, rgba(45,123,116,0.13), transparent 30%),
+      radial-gradient(circle at 20% 100%, rgba(176,125,46,0.10), transparent 40%),
+      linear-gradient(180deg, #f8f2ea 0%, #f2e8db 100%);
+    background-attachment: fixed;
+  }
+
+  /* ---------- layout ---------- */
+  .wrap { display: flex; max-width: 1480px; margin: 0 auto; position: relative; z-index: 1; gap: 8px; }
+  nav {
+    position: sticky; top: 0; align-self: flex-start;
+    width: 262px; min-width: 262px; height: 100vh;
+    padding: 44px 22px; display: flex; flex-direction: column; gap: 3px;
+  }
+  .nav-brand {
+    font-family: var(--serif); font-size: 13px; letter-spacing: .18em; color: var(--accent-deep);
+    font-weight: 600; margin-bottom: 8px; text-transform: uppercase;
+  }
+  .nav-title { font-family: var(--serif); font-size: 26px; font-weight: 600; line-height: 1.28; letter-spacing: -0.01em; margin-bottom: 30px; color: var(--ink); }
+  .nav a {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 10px 14px; border-radius: 999px;
+    color: var(--ink-soft); text-decoration: none; font-size: 14.5px; font-weight: 500;
+    transition: all .22s; border: 1px solid transparent;
+  }
+  .nav a .idx { font-family: var(--num); font-size: 13px; color: var(--muted-2); min-width: 18px; }
+  .nav a:hover { color: var(--ink); background: rgba(255,255,255,0.5); }
+  .nav a.active {
+    color: var(--accent-deep); background: var(--paper-strong);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border-color: var(--line); box-shadow: var(--shadow);
+  }
+  .nav a.active .idx { color: var(--accent); }
+  .nav-foot { margin-top: auto; font-size: 12px; color: var(--muted-2); line-height: 1.7; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+
+  main { flex: 1; min-width: 0; padding: 24px clamp(16px, 3.5vw, 48px) 120px; }
+
+  /* glass panel base */
+  .glass {
+    background: var(--paper);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative; overflow: hidden; border-radius: 32px; padding: clamp(30px, 4vw, 52px);
+    background:
+      linear-gradient(135deg, rgba(255,251,246,0.96), rgba(248,234,220,0.88)),
+      linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.45));
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  .hero::after {
+    content: ''; position: absolute; right: -50px; top: -50px; width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(216,107,42,0.22), transparent 68%); pointer-events: none;
+  }
+  .hero-kicker { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  .hero .issue-no {
+    display: inline-flex; align-items: center; gap: 7px; font-family: var(--num); font-size: 13.5px; font-weight: 600;
+    letter-spacing: .1em; color: #fff7ef; background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    padding: 8px 17px; border-radius: 999px; box-shadow: 0 6px 18px rgba(158,66,24,0.28);
+  }
+  .hero .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .14em; font-weight: 600;
+    color: var(--accent-deep); padding: 8px 16px; border-radius: 999px;
+    background: rgba(216,107,42,0.1); text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: var(--serif); font-size: clamp(38px, 5.4vw, 64px); font-weight: 600; line-height: 1.08;
+    letter-spacing: -0.03em; margin-bottom: 18px;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .lead { font-size: clamp(16px, 1.6vw, 18px); color: var(--muted); max-width: 760px; line-height: 1.7; }
+  .hero .meta { margin-top: 34px; display: flex; gap: clamp(30px, 4.5vw, 60px); flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 26px; }
+  .hero .meta .m-num { font-family: var(--num); font-size: 40px; font-weight: 600; color: var(--ink); line-height: 1; letter-spacing: -0.02em; }
+  .hero .meta .m-num .plus { color: var(--accent); }
+  .hero .meta .m-lab { font-size: 13px; color: var(--muted); margin-top: 9px; letter-spacing: .04em; }
+
+  /* ---------- section heading ---------- */
+  section { padding-top: 80px; scroll-margin-top: 24px; }
+  .sec-head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 28px; }
+  .sec-head .sec-no { font-family: var(--num); font-size: 34px; font-weight: 600; color: var(--accent); line-height: 1; flex: none; letter-spacing: -0.02em; }
+  .sec-head h2 { font-family: var(--serif); font-size: clamp(26px, 3vw, 36px); font-weight: 600; letter-spacing: -0.02em; }
+  .sec-head .sub { font-size: 14px; color: var(--muted); margin-top: 5px; }
+
+  /* ---------- matrix 4-grid ---------- */
+  .matrix-intro { color: var(--ink-soft); max-width: 800px; margin: 0 0 32px; font-size: 16.5px; }
+  .matrix-intro b { color: var(--accent-deep); font-weight: 600; }
+  .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .quad {
+    position: relative; overflow: hidden; border-radius: var(--radius-xl); padding: 30px 30px 28px;
+    transition: transform .28s, box-shadow .28s; border-top: 3px solid var(--q);
+  }
+  .quad::before {
+    content: ''; position: absolute; right: -30px; top: -30px; width: 150px; height: 150px;
+    background: radial-gradient(circle, var(--qglow), transparent 70%); pointer-events: none;
+  }
+  .quad:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+  .quad::after {
+    content: attr(data-no); position: absolute; bottom: 14px; right: 26px;
+    font-family: var(--num); font-size: 52px; font-weight: 600; color: var(--q); opacity: .14; letter-spacing: -0.03em;
+  }
+  .quad .q-tag { font-size: 12px; font-weight: 700; letter-spacing: .12em; color: var(--q); display: inline-block; margin-bottom: 14px; text-transform: uppercase; }
+  .quad h3 { font-family: var(--serif); font-size: 23px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .quad p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.72; }
+  .q-flow { --q: var(--accent); --qglow: rgba(216,107,42,0.16); }
+  .q-core { --q: var(--brass); --qglow: rgba(176,125,46,0.16); }
+  .q-cost { --q: var(--olive); --qglow: rgba(107,117,57,0.15); }
+  .q-comp { --q: var(--teal); --qglow: rgba(45,123,116,0.15); }
+
+  /* ---------- proposal card ---------- */
+  .proposal {
+    position: relative; overflow: hidden; border-radius: 32px; padding: clamp(28px, 3.2vw, 46px);
+  }
+  .proposal::after {
+    content: ''; position: absolute; right: -60px; top: -60px; width: 280px; height: 280px;
+    background: radial-gradient(circle, var(--pglow, rgba(216,107,42,0.13)), transparent 68%); pointer-events: none;
+  }
+  .proposal.tealglow { --pglow: rgba(45,123,116,0.13); }
+  .p-top { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; position: relative; }
+  .p-bignum { font-family: var(--num); font-size: 58px; font-weight: 600; line-height: 1; color: var(--accent); letter-spacing: -0.03em; }
+  .p-titlebox { flex: 1; min-width: 240px; }
+  .p-sub { font-size: 12.5px; letter-spacing: .16em; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .p-titlerow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+  .p-title { font-family: var(--serif); font-size: clamp(27px, 3.4vw, 40px); font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+  .p-tags { display: flex; gap: 9px; flex-wrap: wrap; }
+  .tag { font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; color: var(--c); background: var(--ct); letter-spacing: .02em; }
+  .tag.flow { --c: var(--accent-deep); --ct: rgba(216,107,42,0.14); }
+  .tag.core { --c: #8a601f; --ct: rgba(176,125,46,0.16); }
+  .tag.cost { --c: #4f5a2b; --ct: rgba(107,117,57,0.16); }
+  .tag.comp { --c: var(--teal); --ct: rgba(45,123,116,0.14); }
+
+  /* hot data strip */
+  .hotbar {
+    position: relative; margin: 26px 0; padding: 20px 26px; border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(216,107,42,0.13), rgba(243,215,196,0.4));
+    border: 1px solid rgba(216,107,42,0.18);
+    display: flex; align-items: center; gap: 30px; flex-wrap: wrap;
+  }
+  .hotbar .hb-label { font-size: 12px; color: var(--accent-deep); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .hotbar .stats { display: flex; gap: 34px; flex-wrap: wrap; }
+  .hotbar .stat .num { font-family: var(--num); font-size: 30px; font-weight: 600; color: var(--accent-deep); letter-spacing: -0.02em; }
+  .hotbar .stat .lab { font-size: 12.5px; color: var(--ink-soft); }
+  .hotbar .note { font-size: 13.5px; color: var(--ink-soft); font-style: italic; }
+
+  /* logic list */
+  .p-body { margin-top: 6px; position: relative; }
+  .logic-title {
+    font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--ink);
+    letter-spacing: -0.01em; margin-bottom: 20px; display: flex; align-items: center; gap: 11px;
+  }
+  .logic-title::before { content: ''; width: 24px; height: 3px; border-radius: 999px; background: var(--accent); }
+  .logic { display: grid; gap: 18px; }
+  .logic li { list-style: none; padding-left: 16px; border-left: 2px solid var(--accent-soft); }
+  .logic li .k { font-weight: 700; color: var(--accent-deep); font-size: 15.5px; margin-right: 9px; }
+  .logic li .v { font-size: 15.5px; color: var(--ink); line-height: 1.72; }
+  .logic li .v .hl { color: var(--accent-deep); font-weight: 600; }
+
+  /* gallery */
+  .gallery-title { font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: .14em; text-transform: uppercase; margin: 30px 0 14px; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, 150px); gap: 16px; justify-content: start; }
+  .gallery .thumb {
+    position: relative; border-radius: var(--radius-md); overflow: hidden; cursor: zoom-in;
+    border: 1px solid var(--line); background: rgba(255,255,255,0.6); aspect-ratio: 9/16;
+    transition: transform .24s, box-shadow .24s;
+  }
+  .gallery .thumb:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .gallery .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery .thumb .zoom {
+    position: absolute; right: 9px; bottom: 9px; font-size: 11px; color: #fff;
+    background: rgba(31,26,23,.66); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    border-radius: 999px; padding: 4px 11px; opacity: 0; transition: opacity .2s; letter-spacing: .08em;
+  }
+  .gallery .thumb:hover .zoom { opacity: 1; }
+
+  .proposal + .proposal { margin-top: 22px; }
+
+  /* closing */
+  .closing {
+    position: relative; overflow: hidden; margin-top: 60px; padding: 56px 48px; text-align: center; border-radius: 32px;
+    background: linear-gradient(145deg, rgba(216,107,42,0.14), rgba(255,255,255,0.74));
+    border: 1px solid var(--line); box-shadow: var(--shadow);
+  }
+  .closing::after {
+    content: ''; position: absolute; left: 50%; top: -60px; transform: translateX(-50%); width: 320px; height: 200px;
+    background: radial-gradient(circle, rgba(216,107,42,0.18), transparent 70%); pointer-events: none;
+  }
+  .closing h3 { font-family: var(--serif); font-size: 29px; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.02em; }
+  .closing p { color: var(--ink-soft); max-width: 600px; margin: 0 auto; font-size: 16px; }
+
+  /* ---------- lightbox ---------- */
+  .lb { position: fixed; inset: 0; z-index: 100; background: rgba(31,22,14,.92);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center; padding: 24px; }
+  .lb.open { display: flex; }
+  .lb img { max-width: 92vw; max-height: 88vh; border-radius: var(--radius-md); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .lb-close { position: absolute; top: 20px; right: 26px; font-size: 30px; color: #f5efe6;
+    cursor: pointer; background: none; border: none; line-height: 1; font-family: var(--sans); }
+  .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 36px; color: #f5efe6;
+    cursor: pointer; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22);
+    width: 56px; height: 56px; border-radius: 999px; display: grid; place-items: center; user-select: none;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .lb-prev { left: 24px; } .lb-next { right: 24px; }
+  .lb-count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    font-family: var(--num); font-size: 15px; color: #d8c7b2; }
+
+  /* ---------- mobile ---------- */
+  @media (max-width: 880px) {
+    .wrap { flex-direction: column; gap: 0; }
+    nav { position: static; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap;
+      align-items: center; gap: 6px; padding: 18px; border-bottom: 1px solid var(--line); }
+    .nav-brand, .nav-title { width: 100%; margin: 0; }
+    .nav-title { font-size: 21px; margin-bottom: 10px; }
+    .nav a { padding: 7px 13px; font-size: 13px; }
+    .nav-foot { display: none; }
+    .matrix { grid-template-columns: 1fr; }
+    .lb-nav { width: 44px; height: 44px; font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="nav-brand">有点东西 · 第一期</div>
+    <div class="nav-title">新品选品会<br>产品研发提案</div>
+    <a href="#logic" data-target="logic"><span class="idx">00</span> 选品逻辑 · 四宫格</a>
+    <a href="#p1" data-target="p1"><span class="idx">01</span> DIY迷你烤汉堡</a>
+    <a href="#p2" data-target="p2"><span class="idx">02</span> 雪糕芝士肥牛卷</a>
+    <a href="#p3" data-target="p3"><span class="idx">03</span> 绿野仙踪肉卷</a>
+    <a href="#p4" data-target="p4"><span class="idx">04</span> 水果烤肉季</a>
+    <a href="#p5" data-target="p5"><span class="idx">05</span> 青苔包肉</a>
+    <div class="nav-foot">数据来源 · 小红书 / 大众点评<br>真实热度截图支撑</div>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-kicker">
+        <span class="issue-no">第一期 · VOL.01</span>
+        <span class="eyebrow">产品研发四宫格矩阵</span>
+      </div>
+      <h1>每一道新菜<br>都有明确的<span class="accent">商业使命</span></h1>
+      <p class="lead">本次选品提案按「产品研发四宫格矩阵」推进，确保每一道新菜都精准卡位，且具备小红书 / 大众点评的真实热度数据支撑——不拍脑袋，用数据选品。</p>
+      <div class="meta">
+        <div><div class="m-num">5</div><div class="m-lab">重点爆款提案</div></div>
+        <div><div class="m-num">4</div><div class="m-lab">产品角色维度</div></div>
+        <div><div class="m-num">8500<span class="plus">+</span></div><div class="m-lab">单篇最高点赞</div></div>
+        <div><div class="m-num">17</div><div class="m-lab">热度数据截图</div></div>
+      </div>
+    </header>
+
+    <!-- SECTION 0: 四宫格 -->
+    <section id="logic">
+      <div class="sec-head">
+        <span class="sec-no">00</span>
+        <div><h2>核心目的与选品逻辑</h2></div>
+      </div>
+      <p class="matrix-intro">每个新品都对应一个清晰的产品角色，避免「为上新而上新」。四个角色分工明确：<b>引流获客 · 拉高利润 · 降低成本 · 防御补位</b>。</p>
+      <div class="matrix">
+        <div class="quad glass q-flow" data-no="01">
+          <span class="q-tag">流量款 · 引流</span>
+          <h3>颜值与反差</h3>
+          <p>颜值高 / 有视觉冲击 / 反差感强，为了获客（引流·拉新·复购），激发顾客的社交分享和打卡。</p>
+        </div>
+        <div class="quad glass q-core" data-no="02">
+          <span class="q-tag">核心款 · 利润</span>
+          <h3>招牌升级</h3>
+          <p>招牌肉类的形态 / 味型升级，拉高客单价，贡献门店主要利润。</p>
+        </div>
+        <div class="quad glass q-cost" data-no="03">
+          <span class="q-tag">降本款 · 复用</span>
+          <h3>原料复用</h3>
+          <p>复用原材料，利用现有边角料或常规食材重组，不增加供应链负担。</p>
+        </div>
+        <div class="quad glass q-comp" data-no="04">
+          <span class="q-tag">互补款 · 防御</span>
+          <h3>解腻补位</h3>
+          <p>解决味觉痛点，重置顾客味蕾，延长顾客「战斗力」，提升单桌点单量。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: 重点提案 -->
+    <section id="proposals">
+      <div class="sec-head">
+        <span class="sec-no">01</span>
+        <div><h2>重点爆款提案与数据支撑</h2><div class="sub">5 个提案 · 每个都附小红书 / 大众点评真实热度</div></div>
+      </div>
+
+      <!-- P1 -->
+      <article class="proposal glass" id="p1">
+        <div class="p-top">
+          <div class="p-bignum">01</div>
+          <div class="p-titlebox">
+            <div class="p-sub">极简引流与高频互动</div>
+            <div class="p-titlerow">
+              <div class="p-title">DIY 迷你烤汉堡</div>
+              <div class="p-tags"><span class="tag flow">流量款</span><span class="tag cost">降本复用款</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hotbar">
+          <div class="hb-label">小红书爆款数据</div>
+          <div class="stats">
+            <div class="stat"><span class="num">5000+</span> <span class="lab">单篇点赞</span></div>
+            <div class="stat"><span class="num">1700+</span> <span class="lab">收藏量</span></div>
+          </div>
+          <div class="note">具备极强的「抄作业打卡」属性</div>
+        </div>
+        <div class="p-body">
+          <div class="logic-title">研发落地逻辑</div>
+          <ul class="logic">
+            <li><span class="k">低成本引流</span><span class="v">完美复用门店现有的<span class="hl">肥牛 / 牛肋条</span>作为汉堡夹心，不增加核心肉类采购。</span></li>
+            <li><span class="k">极简供应链</span><span class="v">仅需引入低成本的「迷你汉堡胚」和「芝士片」。</span></li>
+            <li><span class="k">营销赋能</span><span class="v">主打「万物皆可夹」「自己动手 DIY」。可推出<span class="hl">隐藏吃法：+9.9 元换购 DIY 汉堡套组</span>，用低廉物料成本换取顾客在朋友圈 / 小红书的主动曝光。</span></li>
+          </ul>
+        </div>
+        <div class="gallery-title">热度数据截图（点击放大）</div>
+        <div class="gallery" data-group="g1">
+          <div class="thumb"><img loading="lazy" src="assets/p1.jpg" alt="DIY迷你烤汉堡-1"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p2.jpg" alt="DIY迷你烤汉堡-2"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p3.jpg" alt="DIY迷你烤汉堡-3"><span class="zoom">查看</span></div>
+        </div>
+      </article>
+
+      <!-- P2 -->
+      <article class="proposal glass" id="p2">
+        <div class="p-top">
+          <div class="p-bignum">02</div>
+          <div class="p-titlebox">
+            <div class="p-sub">视觉欺骗与破圈传播</div>
+            <div class="p-titlerow">
+              <div class="p-title">雪糕芝士肥牛卷</div>
+              <div class="p-tags"><span class="tag flow">极致流量款</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-body">
+          <div class="logic-title">研发落地逻辑</div>
+          <ul class="logic">
+            <li><span class="k">制造反差感</span><span class="v">外形酷似<span class="hl">牛奶雪糕</span>，实则是厚切芝士裹肥牛。将「甜品形态」与「烤肉」结合，视觉冲击力极强，完美契合年轻女性及学生群体的猎奇心理。</span></li>
+            <li><span class="k">口味成瘾性</span><span class="v">烤化后的芝士拉丝与牛肉油脂混合，奶香浓郁。</span></li>
+            <li><span class="k">落地建议</span><span class="v">后厨可标准化预制，需测试炭火最佳烤制时间以防芝士漏底。</span></li>
+          </ul>
+        </div>
+        <div class="gallery-title">热度数据截图（点击放大）</div>
+        <div class="gallery" data-group="g2">
+          <div class="thumb"><img loading="lazy" src="assets/p4.jpg" alt="雪糕芝士肥牛卷-1"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p5.jpg" alt="雪糕芝士肥牛卷-2"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p6.jpg" alt="雪糕芝士肥牛卷-3"><span class="zoom">查看</span></div>
+        </div>
+      </article>
+
+      <!-- P3 -->
+      <article class="proposal glass tealglow" id="p3">
+        <div class="p-top">
+          <div class="p-bignum">03</div>
+          <div class="p-titlebox">
+            <div class="p-sub">核心肉类价值感大升级</div>
+            <div class="p-titlerow">
+              <div class="p-title">「绿野仙踪」系列肉卷</div>
+              <div class="p-tags"><span class="tag core">核心利润升级款</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hotbar">
+          <div class="hb-label">平台热度数据</div>
+          <div class="stats">
+            <div class="stat"><span class="num">4700+</span> <span class="lab">山姆同款风车卷点赞</span></div>
+            <div class="stat"><span class="num">2000+</span> <span class="lab">香菜肥牛点赞</span></div>
+            <div class="stat"><span class="num">1000+</span> <span class="lab">收藏</span></div>
+          </div>
+        </div>
+        <div class="p-body">
+          <div class="logic-title">研发落地逻辑</div>
+          <ul class="logic">
+            <li><span class="k">借势降维</span><span class="v">借鉴山姆会员店大热的<span class="hl">牛排风车卷（菠菜芝士卷）</span>，利用中产超市的选品为门店背书，提升「高级感」和「健康属性」。</span></li>
+            <li><span class="k">自带解腻</span><span class="v">沙葱的西北天然清香、香菜的清脆，能直接中和牛肉的油腻，解决痛点。</span></li>
+            <li><span class="k">话题制造</span><span class="v">香菜 / 沙葱自带争议流量，能快速在顾客群体引发讨论，提升点单率。建议作为<span class="hl">高客单价主力 SKU</span>。</span></li>
+          </ul>
+        </div>
+        <div class="gallery-title">热度数据截图（点击放大）</div>
+        <div class="gallery" data-group="g3">
+          <div class="thumb"><img loading="lazy" src="assets/p7.jpg" alt="绿野仙踪肉卷-1"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p8.jpg" alt="绿野仙踪肉卷-2"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p9.jpg" alt="绿野仙踪肉卷-3"><span class="zoom">查看</span></div>
+        </div>
+      </article>
+
+      <!-- P4 -->
+      <article class="proposal glass" id="p4">
+        <div class="p-top">
+          <div class="p-bignum">04</div>
+          <div class="p-titlebox">
+            <div class="p-sub">极端食材的碰撞</div>
+            <div class="p-titlerow">
+              <div class="p-title">水果烤肉季</div>
+              <div class="p-tags"><span class="tag flow">话题核武器</span><span class="tag comp">季节限定互补款</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hotbar">
+          <div class="hb-label">平台热度数据</div>
+          <div class="stats">
+            <div class="stat"><span class="num">8500+</span> <span class="lab">榴莲烤肉单篇最高点赞</span></div>
+            <div class="stat"><span class="num">4700+</span> <span class="lab">收藏</span></div>
+          </div>
+          <div class="note">数据呈碾压态势 · 荔枝肥牛处于上升热期</div>
+        </div>
+        <div class="p-body">
+          <div class="logic-title">研发落地逻辑</div>
+          <ul class="logic">
+            <li><span class="k">引流核弹 · 榴莲</span><span class="v">带壳上桌直接烤制，视觉震撼，香气霸道。拉满话题度，且榴莲自带<span class="hl">「昂贵」标签</span>，可顺势拉高这道菜的定价天花板，贡献超高营业额。</span></li>
+            <li><span class="k">清爽解腻 · 荔枝</span><span class="v">抓住夏季水果上市节点，果汁的清甜爆汁感是最高级的解腻方式。</span></li>
+          </ul>
+        </div>
+        <div class="gallery-title">热度数据截图（点击放大）</div>
+        <div class="gallery" data-group="g4">
+          <div class="thumb"><img loading="lazy" src="assets/p10.jpg" alt="水果烤肉季-1"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p11.jpg" alt="水果烤肉季-2"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p12.jpg" alt="水果烤肉季-3"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p13.jpg" alt="水果烤肉季-4"><span class="zoom">查看</span></div>
+        </div>
+      </article>
+
+      <!-- P5 -->
+      <article class="proposal glass tealglow" id="p5">
+        <div class="p-top">
+          <div class="p-bignum">05</div>
+          <div class="p-titlebox">
+            <div class="p-sub">极致跨界 / 猎奇流量款</div>
+            <div class="p-titlerow">
+              <div class="p-title">青苔包肉</div>
+              <div class="p-tags"><span class="tag flow">猎奇流量款</span><span class="tag comp">体验互补款</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hotbar">
+          <div class="hb-label">平台热度数据</div>
+          <div class="stats">
+            <div class="stat"><span class="num">1000+</span> <span class="lab">笔记点赞</span></div>
+          </div>
+          <div class="note">评论区热度极高 ·「杭州烤肉 next level」</div>
+        </div>
+        <div class="p-body">
+          <div class="logic-title">背后的商业与研发逻辑（会上这么说）</div>
+          <ul class="logic">
+            <li><span class="k">地域文化借势</span><span class="v">云南西双版纳傣族特色食材（<span class="hl">油炸水青苔</span>）。把极具地域特色的冷门食材平移到炭烤肉里，主打「不出市就能吃到版纳神仙烤肉」，对年轻人有致命吸引力。</span></li>
+            <li><span class="k">口感互补</span><span class="v">青苔烤熟后口感极脆，类似高级海苔 / 紫菜，带天然鲜味。包裹滋滋冒油的烤肉，<span class="hl">吸走多余油脂</span>，形成「外脆里嫩」的层次感。</span></li>
+            <li><span class="k">降本好存放</span><span class="v">名字猎奇，但青苔在供应链端其实是<span class="hl">干货</span>（脱水压制成饼）。极易保存、损耗率极低、运输成本极低，不给后厨冷链仓储添麻烦。</span></li>
+          </ul>
+        </div>
+        <div class="gallery-title">热度数据截图（点击放大）</div>
+        <div class="gallery" data-group="g5">
+          <div class="thumb"><img loading="lazy" src="assets/p14.jpg" alt="青苔包肉-1"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p15.jpg" alt="青苔包肉-2"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p16.jpg" alt="青苔包肉-3"><span class="zoom">查看</span></div>
+          <div class="thumb"><img loading="lazy" src="assets/p17.jpg" alt="青苔包肉-4"><span class="zoom">查看</span></div>
+        </div>
+      </article>
+
+      <div class="closing">
+        <h3>用数据选品，让每道新菜都有使命</h3>
+        <p>流量 · 利润 · 降本 · 互补 四角色齐备，5 个提案均有真实平台热度背书。期待今天的会上拍板，把热度变成门店的真金白银。</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb">
+  <button class="lb-close" id="lbClose">✕</button>
+  <div class="lb-nav lb-prev" id="lbPrev">‹</div>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-nav lb-next" id="lbNext">›</div>
+  <div class="lb-count" id="lbCount"></div>
+</div>
+
+<script>
+  // ---- scroll-spy nav ----
+  const links = [...document.querySelectorAll('nav a')];
+  const targets = links.map(l => document.getElementById(l.dataset.target)).filter(Boolean);
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.toggle('active', l.dataset.target === e.target.id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+  targets.forEach(t => spy.observe(t));
+
+  // ---- lightbox ----
+  const lb = document.getElementById('lb');
+  const lbImg = document.getElementById('lbImg');
+  const lbCount = document.getElementById('lbCount');
+  let group = [], idx = 0;
+
+  function open(groupEl, startIdx) {
+    group = [...groupEl.querySelectorAll('img')].map(i => i.src);
+    idx = startIdx;
+    show();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function show() {
+    lbImg.src = group[idx];
+    lbCount.textContent = (idx + 1) + ' / ' + group.length;
+  }
+  function close() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function move(d) { idx = (idx + d + group.length) % group.length; show(); }
+
+  document.querySelectorAll('.gallery').forEach(g => {
+    const thumbs = [...g.querySelectorAll('.thumb')];
+    thumbs.forEach((t, i) => t.addEventListener('click', () => open(g, i)));
+  });
+  document.getElementById('lbClose').addEventListener('click', close);
+  document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); move(-1); });
+  document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); move(1); });
+  lb.addEventListener('click', e => { if (e.target === lb) close(); });
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') move(-1);
+    if (e.key === 'ArrowRight') move(1);
+  });
+</script>
+</body>
+</html>
