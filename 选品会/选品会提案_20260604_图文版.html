@@ -76,6 +76,10 @@
   }
   .nav a.active .idx { color: var(--accent); }
   .nav-foot { margin-top: auto; font-size: 12px; color: var(--muted-2); line-height: 1.7; padding-top: 20px; border-top: 1px solid var(--line-soft); }
+  .ed-switch { display: flex; gap: 6px; margin-bottom: 22px; }
+  .ed-switch a { flex: 1; text-align: center; padding: 7px 0; border-radius: 999px; font-family: var(--num); font-size: 12.5px; font-weight: 600; letter-spacing: .03em; color: var(--muted); text-decoration: none; border: 1px solid var(--line); background: rgba(255,255,255,0.42); transition: all .2s; }
+  .ed-switch a:hover { color: var(--ink); background: rgba(255,255,255,0.72); }
+  .ed-switch a.cur { color: #fff7ef; background: linear-gradient(135deg, var(--accent), var(--accent-deep)); border-color: transparent; box-shadow: 0 4px 12px rgba(158,66,24,0.22); }
 
   main { flex: 1; min-width: 0; padding: 24px clamp(16px, 3.5vw, 48px) 120px; }
 
@@ -236,7 +240,8 @@
     .wrap { flex-direction: column; gap: 0; }
     nav { position: static; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap;
       align-items: center; gap: 6px; padding: 18px; border-bottom: 1px solid var(--line); }
-    .nav-brand, .nav-title { width: 100%; margin: 0; }
+    .nav-brand, .nav-title, .ed-switch { width: 100%; margin: 0; }
+    .ed-switch { margin-bottom: 10px; }
     .nav-title { font-size: 21px; margin-bottom: 10px; }
     .nav a { padding: 7px 13px; font-size: 13px; }
     .nav-foot { display: none; }
@@ -249,6 +254,11 @@
   <nav>
     <div class="nav-brand">有点东西 · 第二期</div>
     <div class="nav-title">新品选品会<br>营销视角提案</div>
+    <div class="ed-switch">
+      <a href="/vol1">一期</a>
+      <a href="/vol2" class="cur">二期</a>
+      <a href="/">三期</a>
+    </div>
     <a href="#trend" data-target="trend"><span class="idx">00</span> 大盘趋势 · 底气</a>
     <a href="#dishes" data-target="dishes"><span class="idx">01</span> 精选菜品</a>
     <a href="#ingredients" data-target="ingredients"><span class="idx">02</span> 新奇食材</a>
