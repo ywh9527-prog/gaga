@@ -3,7 +3,14 @@
 > 这是「有点东西」烤肉品牌的**新品选品会**可视化看板项目。
 > 用户（业务侧）会给一份**提案数据**（通常是 .docx，含文字 + 小红书热度截图），
 > 需要把它做成一份**可视化 HTML 长页**，部署到 Cloudflare Pages 供选品会投屏 / 分享。
-> 已做到第一期（Vol.01）。下一期重复本手册即可。
+> 已做到第三期（Vol.03）。
+>
+> ⚠️ **做任何一期前，必须先读营销管理体系：**
+> `GAGA应用/营销管理体系/`
+> - `00-定向与决策/` — 当前方向、决策记录、工作分块
+> - `SOP/02-产品线/` — 选品款型框架（流量/核心/复用/互补）+ 查检表评分细则
+> - 尤其是 `选品-查检表.md`，四款型的评分体系决定了每期提案的分类依据
+> - 营销体系的`项目定向.md`和`术语表.md`也建议先读
 
 ## 线上地址与部署机制（重要）
 
@@ -18,12 +25,17 @@
 
 ```
 选品会/
-├── index.html        # 整个看板（单文件，内嵌 CSS + JS，无外部依赖）
-├── assets/p1.jpg…p17.jpg  # 压缩后的热度截图
-├── CLAUDE.md         # 本文件
-└── .gitignore        # 排除 .remember/ 和 .DS_Store
+├── index.html                          # 在线看板（始终最新一期，部署入口）
+├── 选品会提案_20260528_图文版.html      # 第一期归档
+├── 选品会提案_20260604_图文版.html      # 第二期归档（后续期数类推）
+├── assets/                             # 热度截图（p*.jpg 第一期，v*.jpg 第二期…）
+├── CLAUDE.md                           # 本文件
+└── .gitignore                          # 排除 .remember/ 和 .DS_Store
 ```
 
+- `index.html` = 始终放**最新一期**，部署入口，每次新一期就替换它
+- 每期归档 = `选品会提案_YYYYMMDD_图文版.html`，跟 index.html 同级
+- 日期规则：**每个周四**（YYYYMMDD），新一期比上一期推 **一周**
 - `.remember/` 是私密会话记忆，**绝不能进 git、绝不能传到公网**，已被 .gitignore 排除。
 
 ---
@@ -151,3 +163,50 @@ git branch -d feat/xuanpin-deck-volN
 3. 「绿野仙踪」系列肉卷（核心利润，山姆同款4700+）
 4. 水果烤肉季（话题核武器，榴莲8500+）
 5. 青苔包肉（猎奇流量，杭州烤肉next level）
+
+---
+
+## 浏览器操控能力（agent-browse）
+
+本机运行着 agent-browse 中继服务器，可以通过真实 Chrome 浏览器访问网页。不走 Playwright 的假浏览器，反爬检测低，登录态可复用。
+
+**架构**：AI → MCP/HTTP → agent-browse 中继（localhost:18801）→ WebSocket → Chrome 扩展 → 你的真实 Chrome
+
+**前置条件**（已配好）：
+- `~/agent_browse/server/` 的中继服务器须在运行（`node dist/index.js`，端口 18800/18801）
+- Chrome 须打开并安装了 `~/agent_browse/extension/` 的扩展（已加载的话会自动重连）
+
+**MCP 工具**（通过 opencode MCP 已启用，连 `http://127.0.0.1:18801/mcp`）：
+
+| 工具 | 功能 |
+|------|------|
+| `tabs_list` | 列出所有标签页 |
+| `tab_attach` | 附加调试器到某标签页 |
+| `navigate` | 导航到 URL |
+| `click_selector`、`click_text` | 点击元素 |
+| `type` | 输入文字 |
+| `screenshot` | 截图 |
+| `snapshot` | 获取页面无障碍树（结构化内容） |
+| `evaluate` | 执行 JavaScript |
+| `cookies_get`、`cookies_set` | Cookie 操作 |
+
+**典型用法**（搜小红书竞品笔记）：
+```
+navigate("https://www.xiaohongshu.com/search_result/...")
+wait_for → screenshot/snapshot → 看页面
+click_text("笔记标题") → 点进去
+snapshot → 提取正文、点赞评论数
+```
+
+**⚠️ 安全红线**：
+- 当前走的是本地自建中继，所有流量不出本机，安全
+- 绝对不要改配置连公网中继（browse.clembot.uk）——运营者可看到你的所有浏览内容
+- 涉及登录/短信验证码/滑块验证，必须叫用户手动操作
+
+**如果服务器没在运行**（重启后），启动命令：
+```bash
+cd ~/agent_browse/server
+AGENT_BROWSE_PORT=18800 AGENT_BROWSE_MCP_PORT=18801 \
+AGENT_BROWSE_HOST=127.0.0.1 AGENT_BROWSE_MCP_HOST=127.0.0.1 \
+nohup node dist/index.js > ~/agent-browse-server.log 2>&1 &
+```
